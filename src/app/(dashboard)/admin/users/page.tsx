@@ -181,7 +181,7 @@ export default function AddUserPage() {
                     ) : (
                       departments.map((dept) => (
                         <SelectItem
-                          key={dept.id}
+                          key={dept.dept_id}
                           value={dept.name}
                           className=" text-base md:text-lg hover:bg-[var(--color-purple-light)] hover:text-[var(--color-purple-main)] transition-colors duration-[var(--transition-smooth)]"
                         >

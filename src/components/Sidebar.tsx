@@ -60,7 +60,7 @@ const itemsAdmin = [
     icon: LayoutDashboard,
   },
   {
-    title: "Add Resource",
+    title: "Resource",
     url: "/admin/resources",
     icon: Inbox,
   },
