@@ -67,6 +67,8 @@ export async function signup({
   department: string;
   role: string;
 }) {
+  console.log(email, password, name, department, role);
+
   try {
     const { data, error } = await supabase.auth.signUp({
       email: email,
@@ -74,14 +76,14 @@ export async function signup({
       options: {
         data: {
           name: name,
-          department_id: department,
+          department: department,
           role: role,
         },
       },
     });
 
     if (error) {
-      console.error("Signup failed:", error.message);
+      console.error("Signup failed:", error);
       return { success: false, message: error.message };
     }
 
@@ -91,6 +93,45 @@ export async function signup({
     return {
       success: false,
       message: "An unexpected error occurred during signup",
+    };
+  }
+}
+
+export async function getUser() {
+  try {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error) {
+      return {
+        success: false,
+        message: `Failed to fetch user: ${error.message}`,
+        user: null
+      };
+    }
+
+    if (!data?.user) {
+      return {
+        success: false,
+        message: "No user is currently logged in.",
+        user: null
+      };
+    }
+
+    return {
+      success: true,
+      message: "User retrieved successfully.",
+      user: data.user
+    };
+
+  } catch (err) {
+    let errorMessage = "An unknown error occurred";
+    if (err instanceof Error) {
+      errorMessage = `Unexpected error: ${err.message}`;
+    }
+    return {
+      success: false,
+      message: errorMessage,
+      user: null
     };
   }
 }

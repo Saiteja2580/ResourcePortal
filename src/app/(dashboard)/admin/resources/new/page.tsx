@@ -21,13 +21,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getDepartments, getResourceTypes, ResourceType, type Department } from "@/services/department";
+import {
+  getDepartments,
+  getResourceTypes,
+  ResourceType,
+  type Department,
+} from "@/services/department";
+import { useRouter } from "next/navigation";
+import { insertResource } from "@/services/resource";
 
 const formSchema = z.object({
-  resource_id: z.string().min(1, { message: "Resource ID is required." }),
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   description: z.string().min(1, { message: "Description is required." }),
-  capacity: z.string().min(1, { message: "Capacity is required." }),
+  capacity: z.number().min(1, { message: "Capacity is required." }),
   resource_type_id: z.string({
     required_error: "Please select a resource type.",
   }),
@@ -38,12 +44,13 @@ const formSchema = z.object({
   dept_id: z.string({ required_error: "Please select a department." }),
 });
 
-
 export default function ResourcePage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -51,8 +58,8 @@ export default function ResourcePage() {
       setError(null);
       try {
         const response = await getDepartments();
-        console.log("Responses : ",response);
-        
+        console.log("Responses : ", response);
+
         if (response.error) {
           setError(response.error.message);
         } else if (response.data) {
@@ -66,16 +73,13 @@ export default function ResourcePage() {
       }
     };
 
-
-
-
     const fetchResouceTypes = async () => {
       setIsLoading(true);
       setError(null);
       try {
         const response = await getResourceTypes();
-        console.log("Responses : ",response);
-        
+        console.log("Responses : ", response);
+
         if (response.error) {
           setError(response.error.message);
         } else if (response.data) {
@@ -89,8 +93,6 @@ export default function ResourcePage() {
       }
     };
 
-
-
     fetchDepartments();
     fetchResouceTypes();
   }, []);
@@ -100,7 +102,7 @@ export default function ResourcePage() {
     defaultValues: {
       name: "",
       description: "",
-      capacity: "",
+      capacity: 0,
       resource_type_id: "",
       google_calender_id: "",
       is_active: true,
@@ -108,8 +110,24 @@ export default function ResourcePage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const resetForm = () => {
+    form.reset({
+      name: "",
+      description: "",
+      capacity: 0,
+      resource_type_id: "",
+      google_calender_id: "",
+      is_active: true,
+      dept_id: "",
+    });
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    const result = await insertResource(values);
+    //console.log(result);
+    resetForm();
+    router.push("/admin/resources");
     // TODO: Implement the API call to create/update resource
   }
 
@@ -173,8 +191,14 @@ export default function ResourcePage() {
                   <FormControl>
                     <Input
                       placeholder="Enter capacity"
+                      type="number"
                       className="border-[var(--color-gray-light)] focus:border-[var(--color-purple-main)] transition-colors duration-[var(--transition-smooth)] rounded-[var(--radius-sm)] bg-[var(--color-white)] text-[var(--text-primary)] text-base md:text-lg px-4 py-2"
                       {...field}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage className="text-red-500" />

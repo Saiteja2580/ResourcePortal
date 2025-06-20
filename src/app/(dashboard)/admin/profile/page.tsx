@@ -1,13 +1,52 @@
-import React from "react";
+'use client';
 
-const user = {
-  id: "A12345",
-  full_name: "John Doe",
-  email: "john.doe@example.com",
-  department: "Computer Science",
-};
+import { getProfile } from "@/services/profile";
+import React, { useEffect, useState } from "react";
+
+interface Profile {
+  id: string;
+  full_name: string;
+  email: string;
+  department: string;
+  // add other fields if needed
+}
 
 const ProfilesPage = () => {
+  const [profile, setProfile] = useState<Profile>({
+    id: "",
+    full_name: "",
+    email: "",
+    department: "",
+  });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [message, setMessage] = useState<string>("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      const result = await getProfile();
+      console.log(result);
+      
+
+      if (result.success && result.profile) {
+        setProfile(result.profile);
+        setMessage("");
+      } else {
+        setMessage(result.message || "Failed to fetch profile.");
+        setProfile({
+          id: "",
+          full_name: "",
+          email: "",
+          department: "",
+        });
+      }
+
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, []);
+
   return (
     <div className="bg-card text-card-foreground shadow-[var(--shadow-card)] rounded-2xl p-10 max-w-md mx-auto my-8 font-body border border-[var(--color-border)]">
       <div className="font-heading text-3xl mb-6 text-center font-semibold text-[var(--text-primary)]">
@@ -18,7 +57,7 @@ const ProfilesPage = () => {
           ID
         </span>
         <div className="text-[var(--text-primary)] text-lg font-normal mb-3 bg-[var(--color-muted)] rounded-md py-2 px-4 shadow-sm">
-          {user.id}
+          {profile.id}
         </div>
       </div>
       <div className="mb-5">
@@ -26,7 +65,7 @@ const ProfilesPage = () => {
           Full Name
         </span>
         <div className="text-[var(--text-primary)] text-lg font-normal mb-3 bg-[var(--color-muted)] rounded-md py-2 px-4 shadow-sm">
-          {user.full_name}
+          {profile.full_name}
         </div>
       </div>
       <div className="mb-5">
@@ -34,7 +73,7 @@ const ProfilesPage = () => {
           Email
         </span>
         <div className="text-[var(--text-primary)] text-lg font-normal mb-3 bg-[var(--color-muted)] rounded-md py-2 px-4 shadow-sm">
-          {user.email}
+          {profile.email}
         </div>
       </div>
       <div>
@@ -42,7 +81,7 @@ const ProfilesPage = () => {
           Department
         </span>
         <div className="text-[var(--text-primary)] text-lg font-normal bg-[var(--color-muted)] rounded-md py-2 px-4 shadow-sm">
-          {user.department}
+          {profile.department}
         </div>
       </div>
     </div>

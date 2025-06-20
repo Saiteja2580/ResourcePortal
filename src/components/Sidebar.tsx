@@ -29,6 +29,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { getUser } from "@/services/auth";
+import { useState } from "react";
+import { logout } from "@/services/auth";
 
 const itemsFaculty = [
   {
@@ -85,12 +89,36 @@ export function FacultySidebar({ role }: { role: string }) {
   const router = useRouter();
   const items = role === "faculty" ? itemsFaculty : itemsAdmin;
 
-  const handleSignOut = () => {
-    if (role === "faculty") {
-      router.push("/loginfaculty");
-    }
-    if (role === "admin") {
-      router.push("/loginadmin");
+  const [user, setUser] = useState<any>(null);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await getUser();
+      if (response.success) {
+        setUser(response.user);
+        console.log(response.user);
+      } else {
+        setMessage(response.message);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleSignOut = async () => {
+    const response = await logout();
+    if (response.success) {
+      alert("User Logged Out Successfully");
+      if (role === "faculty") {
+        router.push("/loginfaculty");
+      }
+      if (role === "admin") {
+        router.push("/loginadmin");
+      }
+    } else {
+      alert(response.message);
     }
   };
 
@@ -135,7 +163,8 @@ export function FacultySidebar({ role }: { role: string }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton>
-                    <User2 /> Username
+                    <User2 />{" "}
+                    <span className="text-sm">{user ? user.email : ""}</span>
                     <ChevronUp className="ml-auto" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>

@@ -34,6 +34,7 @@ const formSchema = z.object({
     required_error: "Please select a role.",
   }),
 });
+import { signup } from "@/services/auth";
 
 export default function AddUserPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -71,8 +72,23 @@ export default function AddUserPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const formReset = () => {
+    form.reset({
+      name: "",
+      email: "",
+      password: "",
+    });
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    const response = await signup(values);
+    if (response.success) {
+      alert("User Added Successfully");
+      formReset();
+    } else {
+      alert(response.message);
+    }
     // TODO: Implement the API call to create user
   }
 
