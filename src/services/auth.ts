@@ -68,7 +68,7 @@ export async function signup({
   role: string;
 }) {
   try {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
       options: {
